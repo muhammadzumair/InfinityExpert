@@ -1,23 +1,6 @@
 
-
-/**
- * Copyright 2018 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const functions = require('firebase-functions')
-const { dialogflow } = require('actions-on-google')
+const { dialogflow, BasicCard, Button, Image, Suggestions, Table, BrowseCarousel, BrowseCarouselItem, Carousel } = require('actions-on-google')
 const admin = require('firebase-admin')
 
 //creating db connection
@@ -28,8 +11,124 @@ const db = admin.firestore();
 const app = dialogflow()
 
 app.intent('Default Welcome Intent', conv => {
-    conv.ask('Welcome to my agent!')
+    conv.ask(`Hi, I am an Infinity Expert, I'm happy to answer questions about the QX50. For example, ask me about its engine, cargo capacity, design, or the ProPILOT Assist feature`);
+    conv.ask(new Carousel({
+        items: {
+            // Add the first item to the carousel
+            'Engine': {
+                synonyms: [
+                    'Engine',
+                    'Engine',
+                ],
+                title: 'Engine',
+                description: `WORLD'S FIRST PRODUCTION READY Variable Compression Turbo Engine`,
+                image: new Image({
+                    url: 'https://media-cf.assets-cdk.com//public/social/blogs/e7283558a77e10058a6b0050568b6442/92825f70946540828109d73fa0038aae/2019-qx50-variable-compression-engine.png',
+                    alt: 'Image alternate text',
+                }),
+            },
+            // Add the second item to the carousel
+            'Models': {
+                synonyms: [
+                    'Models',
+                    'Varients'
+                ],
+                title: 'Models',
+                description: 'Infinity QX50 available in 3 different Models of your choice.',
+                image: new Image({
+                    url: 'http://origin.nissannews.com/en-US/infiniti/usa/photos/1e5b/c9ef/1e5bc9ef-7451-4f4d-893d-1e8132d51519-768x432.jpg',
+                    alt: 'QX50 Models',
+                }),
+            },
+
+            'Cargo Capacity': {
+                synonyms: [
+                    'Cargo',
+                    'Capacity',
+                ],
+                title: 'Cargo Capacity',
+                description: 'QX50 offers an impressive 65.1 cubic feet of cargo space - enough for a weekend getaway for the whole family.',
+                image: new Image({
+                    url: 'https://www.infinitiusa.com/crossover/qx50/assets/images/medium/2019-qx50-luxury-crossover-cargo-space.jpg',
+                    alt: 'Cargo',
+                }),
+            },
+        },
+    }));
 })
+
+
+app.intent('Get Option', (conv, input, option) => {
+    if (option === 'Engine') {
+        conv.followup('Invoke_Engine_Intent');
+    }
+    else if (option === 'Cargo Capacity') {
+        conv.followup('Invoke_Cargo_Intent');
+    }
+    else if (option === 'Models') {
+        conv.followup('Invoke_Models_Intent');
+    }
+    else {
+        conv.close('No item Found')
+    }
+})
+
+
+app.intent('Models', conv => {
+    conv.ask('Infinity QX50 available in 3 different Models of your choice.');
+    conv.ask(new BrowseCarousel({
+        items: [
+            new BrowseCarouselItem({
+                title: 'QX50 PURE',
+                url: 'https://www.infiniti.ca/en/crossover/qx50/models-specs',
+                description: 'Starting at  \n$36,550',
+                image: new Image({
+                    url: 'https://www.infinitimarin.com/inventoryphotos/5062/3pcaj5m31kf115553/ip/1.jpg',
+                    alt: 'PURE',
+                })
+            }),
+            new BrowseCarouselItem({
+                title: 'QX50 LUXE',
+                url: 'https://www.infiniti.ca/en/crossover/qx50/models-specs',
+                description: 'Starting at  \n$39,400',
+                image: new Image({
+                    url: 'https://c4d709dd302a2586107d-f8305d22c3db1fdd6f8607b49e47a10c.ssl.cf1.rackcdn.com/thumbnails/stock-images/08b4adc49ec7e5a1f3484a0aa1eff3af.png',
+                    alt: 'LUXE',
+                })
+            }),
+            new BrowseCarouselItem({
+                title: 'QX50 ESSENTIAL',
+                url: 'https://www.infiniti.ca/en/crossover/qx50/models-specs',
+                description: 'Starting at  \n$43,350',
+                image: new Image({
+                    url: 'https://www.crossroadsfordsouthboston.com/assets/stock/ColorMatched_01/White/640/cc_2019INS140001_01_640/cc_2019INS140001_01_640_K23.jpg',
+                    alt: 'Essential',
+                }),
+            }),
+        ],
+    }));
+    conv.ask(new Suggestions(['Models', 'Engine', 'Cargo Capacity', 'Design', 'ProPILOT feature']));
+})
+
+app.intent('Engine', conv => {
+    conv.ask(`It has a 2 liter VC-Turbo 4-cylinder engine with 268 horsepower & 280 foot pounds of torque`);
+    conv.ask(new Table({
+        title: `WORLD'S FIRST PRODUCTION READY`,
+        subtitle: 'Variable Compression Turbo Engine',
+        image: new Image({
+            url: 'https://media-cf.assets-cdk.com//public/social/blogs/e7283558a77e10058a6b0050568b6442/92825f70946540828109d73fa0038aae/2019-qx50-variable-compression-engine.png',
+            alt: 'QX50'
+        }),
+        dividers: true,
+        columns: ['FEATURES', 'POWER', 'EFFICIENCY'],
+        rows: [
+            ['Compression Ration', '8:1', '14:1']
+        ]
+    })
+    )
+    conv.ask(new Suggestions(['Models', 'Engine', 'Cargo Capacity', 'Design', 'ProPILOT feature']));
+})
+
 
 app.intent('Default Fallback Intent', conv => {
     conv.ask(`I didn't understand`)
@@ -66,19 +165,8 @@ app.intent('Languages', (conv, { language, ProgrammingLanguage }) => {
         conv.ask(`What language do you know?`)
 
     }
-
-    //Why doesn't this work?  And worse, it makes recognition of language (e.g. french, english etc) in the sentence fail too.
-    //   agent.context.set({           //this does not work, not sure why. Adding it here also seemed to wreck the ability to recognize langage (e.g. french) but not ProgrammingLanguage (e.g. javascript) (which is odd)
-    //     'name':'SaidLanguage',
-    //     'lifespan': 5,
-    //     'parameters':{
-    //     'language' : 'french',
-    //     'ProgrammingLanguage':'js'
-    //     }
-    //   });
-
-
 });
+
 
 app.intent('Name', (conv, { CarParts }) => {
     let getLangContext = conv.contexts.get('said_language');
@@ -119,6 +207,7 @@ app.intent('FirebaseDB', async (conv) => {
     }
 
 });
+
 
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app)
