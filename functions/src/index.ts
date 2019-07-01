@@ -1,6 +1,6 @@
 
 const functions = require('firebase-functions')
-const { dialogflow, BasicCard, Button, Image, Suggestions, Table, BrowseCarousel, BrowseCarouselItem, Carousel } = require('actions-on-google')
+const { dialogflow, BasicCard, Button, Image, Suggestions, Table, BrowseCarousel, BrowseCarouselItem, Carousel, LinkOutSuggestion } = require('actions-on-google')
 const admin = require('firebase-admin')
 
 //creating db connection
@@ -63,7 +63,11 @@ app.intent('Get Option', (conv, input, option) => {
         conv.followup('Invoke_Engine_Intent');
     }
     else if (option === 'Cargo Capacity') {
-        conv.followup('Invoke_Cargo_Intent');
+        conv.ask('Tap the chip below for more information about cargo capacity')
+        conv.ask(new LinkOutSuggestion({
+            name: 'Tap for more details',
+            url: 'https://www.infinitiusa.com/crossover/qx50/',
+          }));
     }
     else if (option === 'Models') {
         conv.followup('Invoke_Models_Intent');
